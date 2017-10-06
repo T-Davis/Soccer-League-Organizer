@@ -1,6 +1,7 @@
 package com.trevor.model;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 public class Player implements Comparable<Player>, Serializable {
     private static final long serialVersionUID = 1L;
@@ -38,6 +39,11 @@ public class Player implements Comparable<Player>, Serializable {
         return (this.lastName).compareTo(other.lastName);
     }
 
+//    @Override
+//    public int compare(Player a, Player b) {
+//        return a.heightInInches - b.heightInInches;
+//    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,7 +69,7 @@ public class Player implements Comparable<Player>, Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s, %s, Height: %d, Exp: %b",
+        return String.format("%s, %s - %d inches, experience? %b",
                 lastName, firstName, heightInInches, previousExperience);
     }
 }

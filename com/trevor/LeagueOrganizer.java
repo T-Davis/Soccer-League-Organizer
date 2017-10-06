@@ -27,13 +27,16 @@ public class LeagueOrganizer {
         menu.add("Create new team");
         menu.add("Add player to team");
         menu.add("Remove player from team");
-        menu.add("Team report");
+        menu.add("Team Report");
+        menu.add("League Balance Report");
+        menu.add("Print roster");
+        menu.add("Auto-assign players");
         menu.add("Exit the program");
     }
 
     public void welcome() {
         System.out.printf("Welcome to the League Organizer " +
-                "%nPlease input numbers to make your selections");
+                "%nPlease input numbers to make your selections%n%n");
     }
 
     private int promptAction() throws IOException {
@@ -44,7 +47,7 @@ public class LeagueOrganizer {
             System.out.printf("%d - %s %n", count, option);
             count++;
         }
-        System.out.print("What would you like to do? ");
+        System.out.printf("%nWhat would you like to do? ");
         int choice = Integer.parseInt(mReader.readLine());
         return choice;
     }
@@ -56,28 +59,28 @@ public class LeagueOrganizer {
                 choice = promptAction();
                 switch(choice) {
                     case 1:
-                        Team team = promptNewTeam();
-                        teams.add(team);
-                        System.out.printf("Team %s added  %n%n%n", team);
-                        Collections.sort(teams);
+                        createTeam();
                         break;
                     case 2:
-                        Player playerToAdd = selectUnassignedPlayer();
-                        Team teamToAddTo = selectTeam();
-                        teamToAddTo.players.add(playerToAdd);
-                        players.remove(playerToAdd);
-                        System.out.printf("%nPlayer %s added to team %s  %n%n%n", playerToAdd, teamToAddTo);
-                        Collections.sort(teamToAddTo.players);
+                        addPlayerToTeam();
                         break;
                     case 3:
-                        Team teamToRemoveFrom = selectTeam();
-                        Player playerToRemove = selectAssignedPlayer(teamToRemoveFrom);
-                        teamToRemoveFrom.players.remove(playerToRemove);
-                        players.add(playerToRemove);
-                        Collections.sort(players);
+                        removePlayerFromTeam();
                         break;
-                    case 9:
-                        System.out.println("Thanks for playing!");
+                    case 4:
+                        teamReport(selectTeam());
+                        break;
+                    case 5:
+                        //team balance report
+                        break;
+                    case 6:
+                        //print roster
+                        break;
+                    case 7:
+                        //auto assign players
+                        break;
+                    case 8:
+                        //quit program
                         break;
                     default:
                         System.out.printf("Unknown Choice: '%s'. Try again %n%n", choice);
@@ -97,13 +100,37 @@ public class LeagueOrganizer {
         return new Team(teamName, coachName);
     }
 
+    private void createTeam() throws IOException {
+        Team team = promptNewTeam();
+        teams.add(team);
+        System.out.printf("%s added  %n%n%n", team);
+        Collections.sort(teams);
+    }
+
+    private void addPlayerToTeam() throws IOException {
+        Player player = selectUnassignedPlayer();
+        Team team = selectTeam();
+        team.players.add(player);
+        players.remove(player);
+        System.out.printf("%nPlayer %s added to team %s  %n%n%n", player, team);
+        Collections.sort(team.players);
+    }
+
+    private void removePlayerFromTeam() throws IOException {
+        Team team = selectTeam();
+        Player player = selectAssignedPlayer(team);
+        team.players.remove(player);
+        players.add(player);
+        Collections.sort(players);
+    }
+
     private Player selectUnassignedPlayer() throws IOException {
         int count = 1;
         for(Player player : players) {
             System.out.printf("%02d - %s %n", count, player);
             count++;
         }
-        System.out.printf("(enter number)%nChoose a player:  ");
+        System.out.printf("%nChoose a player:  ");
         int choice = Integer.parseInt(mReader.readLine());
         return players.get(choice - 1);
     }
@@ -130,7 +157,20 @@ public class LeagueOrganizer {
         return teams.get(choice - 1);
     }
 
-    private List<Player> playerReport() {
-
+    private void teamReport(Team team) {
+        Collections.sort(team.players, (a, b) -> a.getHeightInInches() < b.getHeightInInches()
+                ? -1 : a.getHeightInInches() == b.getHeightInInches() ? 0 : 1);
+        double expLevel = 0;
+        for (Player player : team.players) {
+            if(player.isPreviousExperience() == true) {
+                expLevel++;
+            }
+            System.out.println();
+            System.out.println(player);
+        }
+        //System.out.println(team.players);
+        System.out.println("Experience of team: " + (expLevel / team.players.size() * 100) + "% ");
+        System.out.println();
+        Collections.sort(team.players);
     }
 }
