@@ -21,6 +21,6 @@ public class Team implements Comparable<Team> {
 
     @Override
     public String toString() {
-        return teamName;
+        return String.format("Team %s coached by %s", teamName, coachName);
     }
 }

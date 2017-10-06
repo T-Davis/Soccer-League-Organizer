@@ -27,14 +27,18 @@ public class LeagueOrganizer {
         menu.add("Create new team");
         menu.add("Add player to team");
         menu.add("Remove player from team");
+        menu.add("Team report");
         menu.add("Exit the program");
+    }
 
-
+    public void welcome() {
+        System.out.printf("Welcome to the League Organizer " +
+                "%nPlease input numbers to make your selections");
     }
 
     private int promptAction() throws IOException {
-        System.out.printf("Welcome to the League Organizer, there are currently " +
-                "%d teams and %d players left to choose from. %nYour options are: %n", teams.size(), players.size());
+        System.out.printf("There are currently %d teams and %d unassigned players. " +
+                "%nYour options are: %n", teams.size(), players.size());
         int count = 1;
         for(String option : menu) {
             System.out.printf("%d - %s %n", count, option);
@@ -99,7 +103,7 @@ public class LeagueOrganizer {
             System.out.printf("%02d - %s %n", count, player);
             count++;
         }
-        System.out.print("Choose a player:  ");
+        System.out.printf("(enter number)%nChoose a player:  ");
         int choice = Integer.parseInt(mReader.readLine());
         return players.get(choice - 1);
     }
@@ -110,7 +114,7 @@ public class LeagueOrganizer {
             System.out.printf("%02d - %s %n", count, player);
             count++;
         }
-        System.out.print("Choose a player:  ");
+        System.out.printf("(enter number)%nChoose a player:  ");
         int choice = Integer.parseInt(mReader.readLine());
         return team.players.get(choice - 1);
     }
@@ -126,8 +130,7 @@ public class LeagueOrganizer {
         return teams.get(choice - 1);
     }
 
+    private List<Player> playerReport() {
 
-    public List<Player> getPlayers() {
-        return players;
     }
 }
