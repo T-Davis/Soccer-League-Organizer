@@ -69,7 +69,7 @@ public class Player implements Comparable<Player>, Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s, %s - %d inches, experience? %b",
+        return String.format("%s, %s - %d inches, experience: %b",
                 lastName, firstName, heightInInches, previousExperience);
     }
 }
