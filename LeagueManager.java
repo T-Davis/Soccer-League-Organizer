@@ -4,7 +4,7 @@ public class LeagueManager {
 
     public static void main(String[] args) {
         // Your code here!
-        LeagueOrganizer leagueOrganizer= new LeagueOrganizer();
+        LeagueOrganizer leagueOrganizer = new LeagueOrganizer();
         leagueOrganizer.welcome();
         leagueOrganizer.run();
     }

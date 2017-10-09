@@ -1,17 +1,16 @@
 package com.trevor.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeSet;
 
 public class Team implements Comparable<Team> {
     public String teamName;
     public String coachName;
-    public List<Player> players;
+    public TreeSet<Player> players;
 
     public Team(String teamName, String coach) {
         this.teamName = teamName;
         this.coachName = coach;
-        players = new ArrayList<>();
+        players = new TreeSet<>();
     }
 
     @Override

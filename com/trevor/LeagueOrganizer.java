@@ -54,8 +54,7 @@ public class LeagueOrganizer {
             count++;
         }
         System.out.printf("%nWhat would you like to do? ");
-        int choice = Integer.parseInt(reader.readLine());
-        return choice;
+        return Integer.parseInt(reader.readLine());
     }
 
     public void run() {
@@ -64,7 +63,7 @@ public class LeagueOrganizer {
         do {
             try {
                 choice = promptAction();
-                if(choice != 8) {
+                if (choice != 8) {
                     if (teamsCount == 0 && choice != 1) {
                         System.out.printf("%n----- You must create a team first ----- %n");
                         continue;
@@ -83,6 +82,10 @@ public class LeagueOrganizer {
                         addPlayerToTeam();
                         break;
                     case 3:
+                        if (teamsCount == 1 && teams.get(0).players.isEmpty()) {
+                            System.out.println("There are no players assigned to " + teams.get(0));
+                            break;
+                        }
                         removePlayerFromTeam();
                         break;
                     case 4:
@@ -121,10 +124,10 @@ public class LeagueOrganizer {
     private Team promptNewTeam() throws IOException, InvalidNameException {
         System.out.print("Enter the team's name:  ");
         String teamName = reader.readLine().trim();
-        String coachName = "";
+        String coachName;
         if (verifyTeamName(teamName)) {
             System.out.print("Enter the coach's name:  ");
-            coachName = reader.readLine();
+            coachName = reader.readLine().trim();
         } else {
             throw new InvalidNameException();
         }
@@ -133,11 +136,11 @@ public class LeagueOrganizer {
     }
 
     private boolean verifyTeamName(String teamName) {
-        if(teamName == null || teamName.equals(""))
+        if (teamName == null || teamName.equals(""))
             return false;
 
-        if(!teamName.matches("[a-zA-Z]*"))
-                return false;
+        if (!teamName.matches("[a-zA-Z]*"))
+            return false;
 
         for (Team team : teams) {
             if (Objects.equals(teamName, team.teamName))
@@ -160,11 +163,14 @@ public class LeagueOrganizer {
         team.players.add(player);
         players.remove(player);
         System.out.printf("%nPlayer %s added to team %s  %n", player, team);
-        Collections.sort(team.players);
     }
 
     private void removePlayerFromTeam() throws IOException {
         Team team = selectTeam();
+        if (team.players.isEmpty()) {
+            System.out.println("There are no players assigned to this team");
+            return;
+        }
         Player player = selectAssignedPlayer(team);
         team.players.remove(player);
         players.add(player);
@@ -190,7 +196,17 @@ public class LeagueOrganizer {
         }
         System.out.printf("%nChoose a player:  ");
         int choice = Integer.parseInt(reader.readLine());
-        return team.players.get(choice - 1);
+        count = 1;
+
+        //is there a way to return this player without making a temp player?
+        for (Player player : team.players) {
+            if (count == choice) return player;
+            count++;
+        }
+
+        //this should never happen1
+
+        return team.players.last();
     }
 
     private Team selectTeam() throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -207,13 +223,13 @@ public class LeagueOrganizer {
     private void teamReport(Team team, boolean sortAndPrint) {
         int expPlayers = 0;
         int teamSize = team.players.size();
-        if(sortAndPrint) {
-            Collections.sort(team.players, Comparator.comparingInt(Player::getHeightInInches));
+        if (sortAndPrint) {
+            List<Player> playerHeight = new ArrayList<>(team.players);
+            playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
             for (Player player : team.players) {
                 if (player.isPreviousExperience()) expPlayers++;
                 System.out.println(player);
             }
-            Collections.sort(team.players);
         } else {
             for (Player player : team.players) {
                 if (player.isPreviousExperience()) expPlayers++;
@@ -226,17 +242,26 @@ public class LeagueOrganizer {
     private void leagueReport() {
         for (Team team : teams) {
             teamReport(team, false);
-            Map<Integer, Integer> playerHeights = new HashMap<>();
+            Map<String, Player> playerHeights = new HashMap<>();
             for (Player player : team.players) {
-                Integer playerHeight = player.getHeightInInches();
-                if (playerHeights.containsKey(playerHeight)) {
-                    Integer temp = playerHeights.get(playerHeight);
-                    playerHeights.replace(playerHeight, ++temp);
-                } else {
-                    playerHeights.put(playerHeight, 1);
+                if (player.getHeightInInches() >= 35 && player.getHeightInInches() <= 40) {
+                    String heightRange = "35 - 40";
+                    playerHeights.put(heightRange, player);
+                }
+                if (player.getHeightInInches() >= 41 && player.getHeightInInches() <= 46) {
+                    String heightRange = "41 - 46";
+                    playerHeights.put(heightRange, player);
+                }
+                if (player.getHeightInInches() >= 47 && player.getHeightInInches() <= 50) {
+                    String heightRange = "47 - 50";
+                    playerHeights.put(heightRange, player);
                 }
             }
-            System.out.println(playerHeights.entrySet());
+            for (String heightRange : playerHeights.keySet()) {
+                System.out.println("These players are between " + heightRange + " inches tall: ");
+                playerHeights.get(heightRange);
+                
+            }
         }
     }
 
@@ -247,9 +272,14 @@ public class LeagueOrganizer {
     }
 
     private void autoAssignPlayers() {
-        Collections.sort(players, Comparator.comparing(Player::isPreviousExperience));
+        if (players.isEmpty()) {
+            System.out.println("There are no unassigned players");
+            return;
+        }
+        players.sort(Comparator.comparing(Player::isPreviousExperience));
         int count = 0;
         for (Player player : players) {
+            if (teams.get(count).players.size() == 11) count++;
             teams.get(count).players.add(player);
             count++;
             if (count == 3) count = 0;
