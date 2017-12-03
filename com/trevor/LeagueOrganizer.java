@@ -16,13 +16,12 @@ public class LeagueOrganizer {
     private BufferedReader reader;
     private List<Team> teams;
     private List<String> menu;
-    private List<Player> players;
+    private Set<Player> players;
     private int totalTeamsNeeded;
 
     public LeagueOrganizer() {
-        players = new ArrayList<>();
+        players = new TreeSet<>();
         players.addAll(Arrays.asList(Players.load()));
-        Collections.sort(players);
         reader = new BufferedReader(new InputStreamReader(System.in));
         teams = new ArrayList<>();
         menu = new ArrayList<>();
@@ -159,6 +158,7 @@ public class LeagueOrganizer {
 
     private void addPlayerToTeam() throws IOException {
         Player player = selectUnassignedPlayer();
+        if (player == null) throw new IllegalStateException("Player cannot be null");
         Team team = selectTeam();
         team.players.add(player);
         players.remove(player);
@@ -172,9 +172,10 @@ public class LeagueOrganizer {
             return;
         }
         Player player = selectAssignedPlayer(team);
+        if (player == null) throw new IllegalStateException("Player cannot be null");
         team.players.remove(player);
         players.add(player);
-        Collections.sort(players);
+//        Collections.sort(players);
     }
 
     private Player selectUnassignedPlayer() throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -185,7 +186,14 @@ public class LeagueOrganizer {
         }
         System.out.printf("%nChoose a player:  ");
         int choice = Integer.parseInt(reader.readLine());
-        return players.get(choice - 1);
+        count = 1;
+
+        for (Player player : players) {
+            if (count == choice) return player;
+            count++;
+        }
+        //this should never happen!
+        return null;
     }
 
     private Player selectAssignedPlayer(Team team) throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -198,15 +206,13 @@ public class LeagueOrganizer {
         int choice = Integer.parseInt(reader.readLine());
         count = 1;
 
-        //is there a way to return this player without making a temp player?
         for (Player player : team.players) {
             if (count == choice) return player;
             count++;
         }
 
-        //this should never happen1
-
-        return team.players.last();
+        //this should never happen!
+        return null;
     }
 
     private Team selectTeam() throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -260,7 +266,7 @@ public class LeagueOrganizer {
             for (String heightRange : playerHeights.keySet()) {
                 System.out.println("These players are between " + heightRange + " inches tall: ");
                 playerHeights.get(heightRange);
-                
+
             }
         }
     }
@@ -276,7 +282,7 @@ public class LeagueOrganizer {
             System.out.println("There are no unassigned players");
             return;
         }
-        players.sort(Comparator.comparing(Player::isPreviousExperience));
+//        players.sort(Comparator.comparing(Player::isPreviousExperience));
         int count = 0;
         for (Player player : players) {
             if (teams.get(count).players.size() == 11) count++;
