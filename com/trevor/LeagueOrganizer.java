@@ -14,16 +14,15 @@ import java.util.Collections;
 
 public class LeagueOrganizer {
     private BufferedReader reader;
-    private List<Team> teams;
+    private TreeSet<Team> teams;
     private List<String> menu;
     private Set<Player> players;
     private int totalTeamsNeeded;
 
     public LeagueOrganizer() {
-        players = new TreeSet<>();
-        players.addAll(Arrays.asList(Players.load()));
+        players = new TreeSet(Arrays.asList(Players.load()));
         reader = new BufferedReader(new InputStreamReader(System.in));
-        teams = new ArrayList<>();
+        teams = new TreeSet<>();
         menu = new ArrayList<>();
         menu.add("Create new team");
         menu.add("Add player to team");
@@ -34,6 +33,17 @@ public class LeagueOrganizer {
         menu.add("Auto-assign players");
         menu.add("Exit the program");
     }
+
+//    private void addDuplicatePlayer() throws IOException {
+//        Team team = selectTeam();
+//        if (team.players.isEmpty()) {
+//            System.out.println("There are no players assigned to this team");
+//            return;
+//        }
+//        Player player = selectAssignedPlayer(team);
+//        if (player == null) throw new IllegalStateException("Player cannot be null");
+//        players.add(player);
+//    }
 
     public void welcome() {
         totalTeamsNeeded = players.size() / 11;
@@ -52,7 +62,7 @@ public class LeagueOrganizer {
             System.out.printf("%d - %s %n", count, option);
             count++;
         }
-        System.out.printf("%nWhat would you like to do? ");
+        System.out.printf("%nWhat would you like to do? %n");
         return Integer.parseInt(reader.readLine());
     }
 
@@ -81,8 +91,8 @@ public class LeagueOrganizer {
                         addPlayerToTeam();
                         break;
                     case 3:
-                        if (teamsCount == 1 && teams.get(0).players.isEmpty()) {
-                            System.out.println("There are no players assigned to " + teams.get(0));
+                        if (teamsCount == 1 && teams.first().players.isEmpty()) {
+                            System.out.printf("%n----- There are no players assigned ----- %n");
                             break;
                         }
                         removePlayerFromTeam();
@@ -98,24 +108,24 @@ public class LeagueOrganizer {
                         break;
                     case 7:
                         if (teamsCount != totalTeamsNeeded) {
-                            System.out.println("You must have all teams created to use auto-assign");
+                            System.out.printf("%n----- You must have all teams created to use auto-assign ----- %n");
                             break;
                         }
-                        autoAssignPlayers();
+//                        autoAssignPlayers();
                         break;
                     case 8:
                         System.out.println("Exiting...");
                         break;
                     default:
-                        System.out.printf("Unknown Choice: '%s'. Try again %n", choice);
+                        System.out.printf("%nUnknown Choice: '%s'. Try again %n", choice);
                 }
             } catch (IOException ioe) {
-                System.out.println("Problem with input");
+                System.out.printf("%n----- Problem with input ----- %n");
                 ioe.printStackTrace();
             } catch (NumberFormatException | IndexOutOfBoundsException ex) {
-                System.out.println("Not a valid selection");
+                System.out.printf("%n----- Not a valid selection ----- %n");
             } catch (InvalidNameException ine) {
-                System.out.println("Team name must not be a duplicate and only contain letters");
+                System.out.printf("%n----- Team name must not be a duplicate and only contain letters ----- %n");
             }
         } while (choice != 8);
     }
@@ -153,13 +163,16 @@ public class LeagueOrganizer {
         Team team = promptNewTeam();
         teams.add(team);
         System.out.printf("%s added  %n", team);
-        Collections.sort(teams);
     }
 
     private void addPlayerToTeam() throws IOException {
         Player player = selectUnassignedPlayer();
         if (player == null) throw new IllegalStateException("Player cannot be null");
         Team team = selectTeam();
+        if (team.players.size() >= 11) {
+            System.out.printf("%n----- Teams cannot have more than 11 players ----- %n");
+            return;
+        }
         team.players.add(player);
         players.remove(player);
         System.out.printf("%nPlayer %s added to team %s  %n", player, team);
@@ -168,7 +181,7 @@ public class LeagueOrganizer {
     private void removePlayerFromTeam() throws IOException {
         Team team = selectTeam();
         if (team.players.isEmpty()) {
-            System.out.println("There are no players assigned to this team");
+            System.out.printf("%n----- There are no players assigned to this team ----- %n");
             return;
         }
         Player player = selectAssignedPlayer(team);
@@ -223,12 +236,24 @@ public class LeagueOrganizer {
         }
         System.out.print("Choose a team:  ");
         int choice = Integer.parseInt(reader.readLine());
-        return teams.get(choice - 1);
+        count = 1;
+
+        for (Team team : teams) {
+            if (count == choice) return team;
+            count++;
+        }
+
+        //this should never happen!
+        return null;
     }
 
     private void teamReport(Team team, boolean sortAndPrint) {
-        int expPlayers = 0;
         int teamSize = team.players.size();
+        if (teamSize == 0) {
+            System.out.printf("%n----- Team %s has zero players -----%n");
+            return;
+        }
+        int expPlayers = 0;
         if (sortAndPrint) {
             List<Player> playerHeight = new ArrayList<>(team.players);
             playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
@@ -277,19 +302,19 @@ public class LeagueOrganizer {
         }
     }
 
-    private void autoAssignPlayers() {
-        if (players.isEmpty()) {
-            System.out.println("There are no unassigned players");
-            return;
-        }
-//        players.sort(Comparator.comparing(Player::isPreviousExperience));
-        int count = 0;
-        for (Player player : players) {
-            if (teams.get(count).players.size() == 11) count++;
-            teams.get(count).players.add(player);
-            count++;
-            if (count == 3) count = 0;
-        }
-        players.clear();
-    }
+//    private void autoAssignPlayers() {
+//        if (players.isEmpty()) {
+//            System.out.println("There are no unassigned players");
+//            return;
+//        }
+////        players.sort(Comparator.comparing(Player::isPreviousExperience));
+//        int count = 0;
+//        for (Player player : players) {
+//            if (teams.get(count).players.size() == 11) count++;
+//            teams.get(count).players.add(player);
+//            count++;
+//            if (count == 3) count = 0;
+//        }
+//        players.clear();
+//    }
 }

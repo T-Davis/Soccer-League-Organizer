@@ -27,22 +27,25 @@ public class Player implements Comparable<Player>, Serializable {
 
     @Override
     public int compareTo(Player other) {
+        if ((this.lastName).compareTo(other.lastName) == 0) {
+            return (this.firstName).compareTo(other.firstName);
+        }
         return (this.lastName).compareTo(other.lastName);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Player)) return false;
-
-        Player player = (Player) o;
-
-        if (heightInInches != player.heightInInches) return false;
-        if (previousExperience != player.previousExperience) return false;
-        if (!firstName.equals(player.firstName)) return false;
-        return lastName.equals(player.lastName);
-
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (!(o instanceof Player)) return false;
+//
+//        Player player = (Player) o;
+//
+//        if (heightInInches != player.heightInInches) return false;
+//        if (previousExperience != player.previousExperience) return false;
+//        if (!firstName.equals(player.firstName)) return false;
+//        return lastName.equals(player.lastName);
+//
+//    }
 
     @Override
     public int hashCode() {
@@ -59,11 +62,4 @@ public class Player implements Comparable<Player>, Serializable {
                 lastName, firstName, heightInInches, previousExperience);
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
 }
