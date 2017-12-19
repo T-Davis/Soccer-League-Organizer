@@ -231,7 +231,7 @@ public class LeagueOrganizer {
     private Team selectTeam() throws IOException, IndexOutOfBoundsException, NumberFormatException {
         int count = 1;
         for (Team team : teams) {
-            System.out.printf("%02d - %s %n", count, team);
+            System.out.printf("%d - %s %n", count, team);
             count++;
         }
         System.out.print("Choose a team:  ");
@@ -250,24 +250,65 @@ public class LeagueOrganizer {
     private void teamReport(Team team, boolean sortAndPrint) {
         int teamSize = team.players.size();
         if (teamSize == 0) {
-            System.out.printf("%n----- Team %s has zero players -----%n");
+            System.out.printf("%n----- %s has zero players -----%n" +
+                    "----- You must have players to run a Team Report -----%n", team);
             return;
         }
-        int expPlayers = 0;
-        if (sortAndPrint) {
-            List<Player> playerHeight = new ArrayList<>(team.players);
-            playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
-            for (Player player : team.players) {
-                if (player.isPreviousExperience()) expPlayers++;
-                System.out.println(player);
+//        int expPlayers = 0;
+//        ------------------- needs map of players by height! ----------------------
+//        Report shows height ranges (35-40, 41-46, 47-50 inches), and under or next
+//        to each range is a list of players falling within the listed range for that team.
+
+//        for (Team team : teams) {
+//            teamReport(team, false);
+        Map<String, Player> playerHeights = new HashMap<>();
+        for (Player player : team.players) {
+            if (player.getHeightInInches() >= 35 && player.getHeightInInches() <= 40) {
+                String heightRange = "35 - 40";
+                playerHeights.put(heightRange, player);
             }
-        } else {
-            for (Player player : team.players) {
-                if (player.isPreviousExperience()) expPlayers++;
+            if (player.getHeightInInches() >= 41 && player.getHeightInInches() <= 46) {
+                String heightRange = "41 - 46";
+                playerHeights.put(heightRange, player);
+            }
+            if (player.getHeightInInches() >= 47 && player.getHeightInInches() <= 50) {
+                String heightRange = "47 - 50";
+                playerHeights.put(heightRange, player);
             }
         }
-        double expPlayerPerc = (double) expPlayers / (double) teamSize * 100;
-        System.out.printf("%n%s has %d players and %.2f percent are experienced%n", team, teamSize, expPlayerPerc);
+
+//        System.out.println(playerHeights.entrySet());
+//        for (String heightRange : playerHeights.keySet()) {
+//            System.out.println("These players are between " + heightRange + " inches tall: ");
+//            for (Player player : playerHeights.values()) {
+//                System.out.println(player);
+//            }
+//            System.out.println();
+//        }
+
+        for (Map.Entry<String, Player> e : playerHeights.entrySet()) {
+//            player.getKey();
+            System.out.println(e.getValue());
+        }
+
+
+
+
+
+//        if (sortAndPrint) {
+//            List<Player> playerHeight = new ArrayList<>(team.players);
+//            playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
+//            for (Player player : team.players) {
+//                if (player.isPreviousExperience()) expPlayers++;
+//                System.out.println(player);
+//            }
+//        } else {
+//            for (Player player : team.players) {
+//                if (player.isPreviousExperience()) expPlayers++;
+//            }
+//        }
+//        double expPlayerPerc = (double) expPlayers / (double) teamSize * 100;
+//        System.out.printf("%n%s has %d players and %.2f percent are experienced%n", team, teamSize, expPlayerPerc);
     }
 
     private void leagueReport() {
@@ -290,8 +331,7 @@ public class LeagueOrganizer {
             }
             for (String heightRange : playerHeights.keySet()) {
                 System.out.println("These players are between " + heightRange + " inches tall: ");
-                playerHeights.get(heightRange);
-
+                System.out.println(playerHeights.get(heightRange));
             }
         }
     }
