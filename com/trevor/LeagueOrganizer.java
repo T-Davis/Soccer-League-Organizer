@@ -261,20 +261,39 @@ public class LeagueOrganizer {
 
 //        for (Team team : teams) {
 //            teamReport(team, false);
-        Map<String, Player> playerHeights = new HashMap<>();
+        Map<String, List<Player>> playerHeights = new HashMap<>();
+        playerHeights.put("35 - 40", new ArrayList<Player>());
+        playerHeights.put("41 - 46", new ArrayList<Player>());
+        playerHeights.put("47 - 50", new ArrayList<Player>());
         for (Player player : team.players) {
-            if (player.getHeightInInches() >= 35 && player.getHeightInInches() <= 40) {
-                String heightRange = "35 - 40";
-                playerHeights.put(heightRange, player);
+            int playerHeight = player.getHeightInInches();
+
+            if (playerHeight >= 35 && playerHeight <= 40) {
+                playerHeights.get("35 - 40").add(player);
             }
-            if (player.getHeightInInches() >= 41 && player.getHeightInInches() <= 46) {
-                String heightRange = "41 - 46";
-                playerHeights.put(heightRange, player);
+            if (playerHeight >= 41 && playerHeight <= 46) {
+                playerHeights.get("41 - 46").add(player);
             }
-            if (player.getHeightInInches() >= 47 && player.getHeightInInches() <= 50) {
-                String heightRange = "47 - 50";
-                playerHeights.put(heightRange, player);
+            if (playerHeight >= 47 && playerHeight <= 50) {
+                playerHeights.get("47 - 50").add(player);
             }
+        }
+
+        System.out.println("Players from 35 - 40 inches tall");
+        for (Player player : playerHeights.get("35 - 40")) {
+            System.out.println(player);
+        }
+        System.out.println();
+
+        System.out.println("Players from 41 - 46 inches tall");
+        for (Player player : playerHeights.get("41 - 46")) {
+            System.out.println(player);
+        }
+        System.out.println();
+
+        System.out.println("Players from 47 - 50 inches tall");
+        for (Player player : playerHeights.get("47 - 50")) {
+            System.out.println(player);
         }
 
 //        System.out.println(playerHeights.entrySet());
@@ -286,10 +305,10 @@ public class LeagueOrganizer {
 //            System.out.println();
 //        }
 
-        for (Map.Entry<String, Player> e : playerHeights.entrySet()) {
-//            player.getKey();
-            System.out.println(e.getValue());
-        }
+//        for (Map.Entry<String, Player> e : playerHeights.entrySet()) {
+////            player.getKey();
+//            System.out.println(e.getValue());
+//        }
 
 
 
