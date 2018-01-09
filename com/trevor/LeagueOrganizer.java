@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import java.util.Collections;
-
 public class LeagueOrganizer {
     private BufferedReader reader;
     private TreeSet<Team> teams;
@@ -27,8 +25,8 @@ public class LeagueOrganizer {
         menu.add("Create new team");
         menu.add("Add player to team");
         menu.add("Remove player from team");
-        menu.add("Team Report");
         menu.add("League Balance Report");
+        menu.add("Experience Report");
         menu.add("Print roster");
         menu.add("Auto-assign players");
         menu.add("Exit the program");
@@ -98,10 +96,10 @@ public class LeagueOrganizer {
                         removePlayerFromTeam();
                         break;
                     case 4:
-                        teamReport(selectTeam(), true);
+                        leagueBalanceReport(selectTeam());
                         break;
                     case 5:
-                        leagueReport();
+                        experienceReport();
                         break;
                     case 6:
                         printRoster();
@@ -247,7 +245,7 @@ public class LeagueOrganizer {
         return null;
     }
 
-    private void teamReport(Team team, boolean sortAndPrint) {
+    private void leagueBalanceReport(Team team) {
         int teamSize = team.players.size();
         if (teamSize == 0) {
             System.out.printf("%n----- %s has zero players -----%n" +
@@ -260,7 +258,7 @@ public class LeagueOrganizer {
 //        to each range is a list of players falling within the listed range for that team.
 
 //        for (Team team : teams) {
-//            teamReport(team, false);
+//            leagueBalanceReport(team, false);
         Map<String, List<Player>> playerHeights = new HashMap<>();
         playerHeights.put("35 - 40", new ArrayList<Player>());
         playerHeights.put("41 - 46", new ArrayList<Player>());
@@ -279,22 +277,47 @@ public class LeagueOrganizer {
             }
         }
 
+        int heightCount = 0;
         System.out.println("Players from 35 - 40 inches tall");
         for (Player player : playerHeights.get("35 - 40")) {
             System.out.println(player);
+            heightCount++;
         }
+        int count35to40 = heightCount;
+        heightCount = 0;
         System.out.println();
 
         System.out.println("Players from 41 - 46 inches tall");
         for (Player player : playerHeights.get("41 - 46")) {
             System.out.println(player);
+            heightCount++;
         }
+        int count41to46 = heightCount;
+        heightCount = 0;
         System.out.println();
 
         System.out.println("Players from 47 - 50 inches tall");
         for (Player player : playerHeights.get("47 - 50")) {
             System.out.println(player);
+            heightCount++;
         }
+        int count47to50 = heightCount;
+        System.out.println();
+
+        System.out.printf("Count of player heights: %n" +
+                            "35-40 = %d %n" +
+                            "41-46 = %d %n" +
+                            "47-50 = %d %n", count35to40, count41to46, count47to50);
+
+
+
+
+
+
+
+
+
+
 
 //        System.out.println(playerHeights.entrySet());
 //        for (String heightRange : playerHeights.keySet()) {
@@ -330,9 +353,9 @@ public class LeagueOrganizer {
 //        System.out.printf("%n%s has %d players and %.2f percent are experienced%n", team, teamSize, expPlayerPerc);
     }
 
-    private void leagueReport() {
+    private void experienceReport() {
         for (Team team : teams) {
-            teamReport(team, false);
+            leagueBalanceReport(team);
             Map<String, Player> playerHeights = new HashMap<>();
             for (Player player : team.players) {
                 if (player.getHeightInInches() >= 35 && player.getHeightInInches() <= 40) {
