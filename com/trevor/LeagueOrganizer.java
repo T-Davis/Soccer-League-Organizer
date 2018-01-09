@@ -260,10 +260,12 @@ public class LeagueOrganizer {
 //        for (Team team : teams) {
 //            leagueBalanceReport(team, false);
         Map<String, List<Player>> playerHeights = new HashMap<>();
-        playerHeights.put("35 - 40", new ArrayList<Player>());
-        playerHeights.put("41 - 46", new ArrayList<Player>());
-        playerHeights.put("47 - 50", new ArrayList<Player>());
+        playerHeights.put("35 - 40", new ArrayList<>());
+        playerHeights.put("41 - 46", new ArrayList<>());
+        playerHeights.put("47 - 50", new ArrayList<>());
+        double avgExperience = 0;
         for (Player player : team.players) {
+            if (player.isPreviousExperience()) avgExperience++;
             int playerHeight = player.getHeightInInches();
 
             if (playerHeight >= 35 && playerHeight <= 40) {
@@ -309,9 +311,17 @@ public class LeagueOrganizer {
                             "41-46 = %d %n" +
                             "47-50 = %d %n", count35to40, count41to46, count47to50);
 
+        avgExperience = avgExperience / teamSize;
+        //this needs fixed, "%d != Double
+//        System.out.printf("Average experience is %d%n", avgExperience);
+        //move this to experience report
 
 
 
+
+// ----------------- ask this question!
+//        does this "Shows a count of how many players are that height on each team." mean for the selected team or for all teams regardless of
+//        what team has been selected?
 
 
 
@@ -354,27 +364,35 @@ public class LeagueOrganizer {
     }
 
     private void experienceReport() {
+        Map<String, List> experiencedPlayers = new HashMap<>();
+
         for (Team team : teams) {
-            leagueBalanceReport(team);
-            Map<String, Player> playerHeights = new HashMap<>();
+            String teamName = team.teamName;
+//            experiencedPlayers.put(team.teamName, new ArrayList<>());
+            List<Player> noExperience = new ArrayList<>();
+            List<Player> yesExperience = new ArrayList<>();
             for (Player player : team.players) {
-                if (player.getHeightInInches() >= 35 && player.getHeightInInches() <= 40) {
-                    String heightRange = "35 - 40";
-                    playerHeights.put(heightRange, player);
-                }
-                if (player.getHeightInInches() >= 41 && player.getHeightInInches() <= 46) {
-                    String heightRange = "41 - 46";
-                    playerHeights.put(heightRange, player);
-                }
-                if (player.getHeightInInches() >= 47 && player.getHeightInInches() <= 50) {
-                    String heightRange = "47 - 50";
-                    playerHeights.put(heightRange, player);
-                }
+                if (!player.isPreviousExperience()) noExperience.add(player);
+                if (player.isPreviousExperience()) yesExperience.add(player);
             }
-            for (String heightRange : playerHeights.keySet()) {
-                System.out.println("These players are between " + heightRange + " inches tall: ");
-                System.out.println(playerHeights.get(heightRange));
+            List<List> listOfListOfExpOrNotPlayers = new ArrayList<>();
+            listOfListOfExpOrNotPlayers.add(yesExperience);
+            listOfListOfExpOrNotPlayers.add(noExperience);
+            experiencedPlayers.put(teamName, listOfListOfExpOrNotPlayers);
+
+            System.out.printf("Experienced players of team %s: %n", teamName);
+            for (Player player : yesExperience) {
+                System.out.println(player);
             }
+            System.out.printf("Non-experienced players of team %s: %n", teamName);
+            for (Player player : noExperience) {
+                System.out.println(player);
+            }
+            double numExp = yesExperience.size();
+            double numNonExp = noExperience.size();
+            double expPerc = 100 * (numExp / (numExp + numNonExp));
+            System.out.println();
+            System.out.println("Team " + teamName + " is " + expPerc + "% experienced ");
         }
     }
 
