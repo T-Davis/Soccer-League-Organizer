@@ -28,7 +28,7 @@ public class LeagueOrganizer {
         menu.add("League Balance Report");
         menu.add("Experience Report");
         menu.add("Print roster");
-        menu.add("Auto-assign players");
+        menu.add("Auto-assign players (In development)");
         menu.add("Exit the program");
     }
 
