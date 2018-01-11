@@ -1,8 +1,8 @@
 package com.trevor;
 
-import com.trevor.model.Team;
 import com.trevor.model.Player;
 import com.trevor.model.Players;
+import com.trevor.model.Team;
 
 import javax.naming.InvalidNameException;
 import java.io.BufferedReader;
@@ -25,10 +25,10 @@ public class LeagueOrganizer {
         menu.add("Create new team");
         menu.add("Add player to team");
         menu.add("Remove player from team");
-        menu.add("Height Report");
         menu.add("League Balance Report");
+        menu.add("Experience Report");
         menu.add("Print roster");
-        menu.add("Auto-assign players");
+        menu.add("Auto-assign players (In development)");
         menu.add("Exit the program");
     }
 
@@ -96,20 +96,16 @@ public class LeagueOrganizer {
                         removePlayerFromTeam();
                         break;
                     case 4:
-                        heightReport(selectTeam());
+                        leagueBalanceReport(selectTeam());
                         break;
                     case 5:
-                        leagueReport();
+                        experienceReport();
                         break;
                     case 6:
                         printRoster();
                         break;
                     case 7:
-                        if (teamsCount != totalTeamsNeeded) {
-                            System.out.printf("%n----- You must have all teams created to use auto-assign ----- %n");
-                            break;
-                        }
-//                        autoAssignPlayers();
+                        autoAssignPlayers();
                         break;
                     case 8:
                         System.out.println("Exiting...");
@@ -245,7 +241,9 @@ public class LeagueOrganizer {
         return null;
     }
 
-    private void heightReport(Team team) {
+
+    //this needs fixed, "%d != Double
+    private void leagueBalanceReport(Team team) {
         int teamSize = team.players.size();
         if (teamSize == 0) {
             System.out.printf("%n----- %s has zero players -----%n" +
@@ -253,14 +251,21 @@ public class LeagueOrganizer {
             return;
         }
 
-        Map<String, Set<Player>> playerHeights = new HashMap<>();
+//        Map<String, Set<Player>> playerHeights = new HashMap<>();
+//        playerHeights.put(h1, new TreeSet<>());
+//        playerHeights.put(h2, new TreeSet<>());
+//        playerHeights.put(h3, new TreeSet<>());
         String h1 = "35 - 40";
         String h2 = "41 - 46";
         String h3 = "47 - 50";
-        playerHeights.put(h1, new TreeSet<>());
-        playerHeights.put(h2, new TreeSet<>());
-        playerHeights.put(h3, new TreeSet<>());
+
+        Map<String, List<Player>> playerHeights = new HashMap<>();
+        playerHeights.put("35 - 40", new ArrayList<>());
+        playerHeights.put("41 - 46", new ArrayList<>());
+        playerHeights.put("47 - 50", new ArrayList<>());
+        double avgExperience = 0;
         for (Player player : team.players) {
+            if (player.isPreviousExperience()) avgExperience++;
             int playerHeight = player.getHeightInInches();
 
             if (playerHeight >= 35 && playerHeight <= 40) {
@@ -274,22 +279,44 @@ public class LeagueOrganizer {
             }
         }
 
+        int heightCount = 0;
         System.out.printf("There are %d players %s inches tall %n", playerHeights.get(h1).size(), h1);
         for (Player player : playerHeights.get(h1)) {
             System.out.println(player);
+            heightCount++;
         }
+        int count35to40 = heightCount;
+        heightCount = 0;
         System.out.println();
-
         System.out.printf("There are %d players %s inches tall %n", playerHeights.get(h2).size(), h2);
         for (Player player : playerHeights.get(h2)) {
             System.out.println(player);
+            heightCount++;
         }
+        int count41to46 = heightCount;
+        heightCount = 0;
         System.out.println();
 
         System.out.printf("There are %d players %s inches tall %n", playerHeights.get(h3).size(), h3);
         for (Player player : playerHeights.get(h3)) {
             System.out.println(player);
+            heightCount++;
         }
+        int count47to50 = heightCount;
+        System.out.println();
+
+        System.out.printf("Count of player heights: %n" +
+                "35-40 = %d %n" +
+                "41-46 = %d %n" +
+                "47-50 = %d %n", count35to40, count41to46, count47to50);
+
+        avgExperience = avgExperience / teamSize;
+        System.out.printf("Average experience is %.3f%n", avgExperience);
+//        this may not be where the exp stuff goes
+    }
+
+
+
 
 //        System.out.println(playerHeights.entrySet());
 //        for (String heightRange : playerHeights.keySet()) {
@@ -306,9 +333,6 @@ public class LeagueOrganizer {
 //        }
 
 
-
-
-
 //        if (sortAndPrint) {
 //            List<Player> playerHeight = new ArrayList<>(team.players);
 //            playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
@@ -323,10 +347,42 @@ public class LeagueOrganizer {
 //        }
 //        double expPlayerPerc = (double) expPlayers / (double) teamSize * 100;
 //        System.out.printf("%n%s has %d players and %.2f percent are experienced%n", team, teamSize, expPlayerPerc);
-    }
 
-    private void leagueReport() {
 
+    private void experienceReport() {
+        Map<String, List> experiencedPlayers = new HashMap<>();
+
+        for (Team team : teams) {
+            String teamName = team.teamName;
+//            experiencedPlayers.put(team.teamName, new ArrayList<>());
+            List<Player> noExperience = new ArrayList<>();
+            List<Player> yesExperience = new ArrayList<>();
+            for (Player player : team.players) {
+                if (!player.isPreviousExperience()) noExperience.add(player);
+                if (player.isPreviousExperience()) yesExperience.add(player);
+            }
+            List<List> listOfListOfExpOrNotPlayers = new ArrayList<>();
+            listOfListOfExpOrNotPlayers.add(yesExperience);
+            listOfListOfExpOrNotPlayers.add(noExperience);
+            experiencedPlayers.put(teamName, listOfListOfExpOrNotPlayers);
+
+            System.out.printf("Experienced players of team %s: %n", teamName);
+            for (Player player : yesExperience) {
+                System.out.println(player);
+            }
+            System.out.println();
+            System.out.printf("Non-experienced players of team %s: %n", teamName);
+            for (Player player : noExperience) {
+                System.out.println(player);
+            }
+            double numExp = yesExperience.size();
+            double numNonExp = noExperience.size();
+            double expPerc = 100 * (numExp / (numExp + numNonExp));
+            System.out.println();
+            System.out.printf("Team %s has %d experienced and %d inexperienced players %n" +
+                                "Team %s is %.2f%% experienced %n",
+                                teamName, (int)numExp, (int)numNonExp, teamName, expPerc);
+        }
     }
 
     private void printRoster() throws IOException {
@@ -335,19 +391,18 @@ public class LeagueOrganizer {
         }
     }
 
-//    private void autoAssignPlayers() {
-//        if (players.isEmpty()) {
-//            System.out.println("There are no unassigned players");
-//            return;
-//        }
-////        players.sort(Comparator.comparing(Player::isPreviousExperience));
-//        int count = 0;
-//        for (Player player : players) {
-//            if (teams.get(count).players.size() == 11) count++;
-//            teams.get(count).players.add(player);
-//            count++;
-//            if (count == 3) count = 0;
-//        }
-//        players.clear();
-//    }
+    private void autoAssignPlayers() {
+        if (players.isEmpty()) {
+            System.out.println("There are no unassigned players");
+            return;
+        }
+
+        for (Team team : teams) {
+            while (team.players.size() != 11) {
+                Player player = players.iterator().next();
+                team.players.add(player);
+                players.remove(player);
+            }
+        }
+    }
 }
