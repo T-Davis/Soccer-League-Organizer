@@ -33,20 +33,6 @@ public class Player implements Comparable<Player>, Serializable {
         return (this.lastName).compareTo(other.lastName);
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (!(o instanceof Player)) return false;
-//
-//        Player player = (Player) o;
-//
-//        if (heightInInches != player.heightInInches) return false;
-//        if (previousExperience != player.previousExperience) return false;
-//        if (!firstName.equals(player.firstName)) return false;
-//        return lastName.equals(player.lastName);
-//
-//    }
-
     @Override
     public int hashCode() {
         int result = firstName.hashCode();

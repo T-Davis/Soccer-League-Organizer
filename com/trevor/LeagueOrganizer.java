@@ -33,17 +33,6 @@ public class LeagueOrganizer {
         menu.add("Exit the program");
     }
 
-//    private void addDuplicatePlayer() throws IOException {
-//        Team team = selectTeam();
-//        if (team.players.isEmpty()) {
-//            System.out.println("There are no players assigned to this team");
-//            return;
-//        }
-//        Player player = selectAssignedPlayer(team);
-//        if (player == null) throw new IllegalStateException("Player cannot be null");
-//        players.add(player);
-//    }
-
     public void welcome() {
         System.out.printf("Welcome to the League Organizer " +
                 "%nPlease input numbers to make your selections%n");
@@ -67,11 +56,9 @@ public class LeagueOrganizer {
         do {
             try {
                 choice = promptAction();
-                if (choice != 8) {
-                    if (numTeamsNeeded == 3 && choice != 1) {
-                        System.out.printf("%n----- You must create a team first ----- %n");
-                        continue;
-                    }
+                if (numTeamsNeeded == 3 && choice != 1 && choice != 8) {
+                    System.out.printf("%n----- You must create a team first ----- %n");
+                    continue;
                 }
                 switch (choice) {
                     case 1:
@@ -172,10 +159,8 @@ public class LeagueOrganizer {
             return;
         }
         Player player = selectAssignedPlayer(team);
-       // if (player == null) throw new IllegalStateException("Player cannot be null");
         team.players.remove(player);
         players.add(player);
-//        Collections.sort(players);
     }
 
     private Player selectUnassignedPlayer() throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -210,7 +195,6 @@ public class LeagueOrganizer {
             if (count == choice) return player;
             count++;
         }
-
         //this should never happen!
         return null;
     }
@@ -229,13 +213,10 @@ public class LeagueOrganizer {
             if (count == choice) return team;
             count++;
         }
-
         //this should never happen!
         return null;
     }
 
-
-    //this needs fixed, "%d != Double
     private void leagueBalanceReport(Team team) {
         int teamSize = team.players.size();
         if (teamSize == 0) {
@@ -244,10 +225,6 @@ public class LeagueOrganizer {
             return;
         }
 
-//        Map<String, Set<Player>> playerHeights = new HashMap<>();
-//        playerHeights.put(h1, new TreeSet<>());
-//        playerHeights.put(h2, new TreeSet<>());
-//        playerHeights.put(h3, new TreeSet<>());
         String h1 = "35 - 40";
         String h2 = "41 - 46";
         String h3 = "47 - 50";
@@ -305,49 +282,13 @@ public class LeagueOrganizer {
 
         avgExperience = 100 * (avgExperience / teamSize);
         System.out.printf("Average experience is %.2f%%%n", avgExperience);
-//        this may not be where the exp stuff goes
     }
-
-
-
-
-//        System.out.println(playerHeights.entrySet());
-//        for (String heightRange : playerHeights.keySet()) {
-//            System.out.println("These players are between " + heightRange + " inches tall: ");
-//            for (Player player : playerHeights.values()) {
-//                System.out.println(player);
-//            }
-//            System.out.println();
-//        }
-
-//        for (Map.Entry<String, Player> e : playerHeights.entrySet()) {
-////            player.getKey();
-//            System.out.println(e.getValue());
-//        }
-
-
-//        if (sortAndPrint) {
-//            List<Player> playerHeight = new ArrayList<>(team.players);
-//            playerHeight.sort(Comparator.comparingInt(Player::getHeightInInches));
-//            for (Player player : team.players) {
-//                if (player.isPreviousExperience()) expPlayers++;
-//                System.out.println(player);
-//            }
-//        } else {
-//            for (Player player : team.players) {
-//                if (player.isPreviousExperience()) expPlayers++;
-//            }
-//        }
-//        double expPlayerPerc = (double) expPlayers / (double) teamSize * 100;
-//        System.out.printf("%n%s has %d players and %.2f percent are experienced%n", team, teamSize, expPlayerPerc);
-
 
     private void experienceReport() {
         Map<String, List> experiencedPlayers = new HashMap<>();
 
         for (Team team : teams) {
             String teamName = team.teamName;
-//            experiencedPlayers.put(team.teamName, new ArrayList<>());
             List<Player> noExperience = new ArrayList<>();
             List<Player> yesExperience = new ArrayList<>();
             for (Player player : team.players) {
@@ -373,8 +314,8 @@ public class LeagueOrganizer {
             double expPerc = 100 * (numExp / (numExp + numNonExp));
             System.out.println();
             System.out.printf("Team %s has %d experienced and %d inexperienced players %n" +
-                                "Team %s is %.2f%% experienced %n%n",
-                                teamName, (int)numExp, (int)numNonExp, teamName, expPerc);
+                            "Team %s is %.2f%% experienced %n%n",
+                    teamName, (int) numExp, (int) numNonExp, teamName, expPerc);
         }
     }
 
