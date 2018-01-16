@@ -1,6 +1,7 @@
 package com.trevor.model;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 public class Player implements Comparable<Player>, Serializable {
     private static final long serialVersionUID = 1L;
@@ -47,5 +48,4 @@ public class Player implements Comparable<Player>, Serializable {
         return String.format("%s, %s - %d inches, experience: %b",
                 lastName, firstName, heightInInches, previousExperience);
     }
-
 }

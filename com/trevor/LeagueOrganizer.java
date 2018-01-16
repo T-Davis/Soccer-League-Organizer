@@ -9,10 +9,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Stream;
+
+// fix league report and auto assign
+
+
+
+
+
+
+
+
 
 public class LeagueOrganizer {
     private BufferedReader reader;
-    private TreeSet<Team> teams;
+    private Set<Team> teams;
     private List<String> menu;
     private Set<Player> players;
     private int numTeamsNeeded;
@@ -29,7 +40,7 @@ public class LeagueOrganizer {
         menu.add("League Balance Report");
         menu.add("Experience Report");
         menu.add("Print roster");
-        menu.add("Auto-assign players (In development)");
+        menu.add("Auto-assign players");
         menu.add("Exit the program");
     }
 
@@ -333,13 +344,20 @@ public class LeagueOrganizer {
             return;
         }
 
-        for (Team team : teams) {
-            while (team.players.size() != 11) {
-                Player player = players.iterator().next();
-                team.players.add(player);
-                players.remove(player);
-            }
-        }
+//        for (Team team : teams) {
+//            while (team.players.size() != 11) {
+//                Player player = players.iterator().next();
+//                team.players.add(player);
+//                players.remove(player);
+//            }
+//        }
+
+        Comparator<Player> comparator = Comparator.comparing(player -> player.isPreviousExperience());
+        comparator = comparator.thenComparing(Comparator.comparing(player -> player.getHeightInInches()));
+
+        // Sort the stream:
+        Stream<Player> playerStream = players.stream().sorted(comparator);
+        playerStream.forEach(System.out::println);
 
         System.out.println("Auto-assign complete");
     }
