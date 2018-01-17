@@ -14,13 +14,6 @@ import java.util.stream.Stream;
 // fix league report and auto assign
 
 
-
-
-
-
-
-
-
 public class LeagueOrganizer {
     private BufferedReader reader;
     private Set<Team> teams;
@@ -343,21 +336,28 @@ public class LeagueOrganizer {
             System.out.println("There are no unassigned players");
             return;
         }
-
-//        for (Team team : teams) {
-//            while (team.players.size() != 11) {
-//                Player player = players.iterator().next();
-//                team.players.add(player);
-//                players.remove(player);
-//            }
-//        }
+        if (numTeamsNeeded != 0) {
+            System.out.println("You must create all the teams first");
+            return;
+        }
 
         Comparator<Player> comparator = Comparator.comparing(player -> player.isPreviousExperience());
         comparator = comparator.thenComparing(Comparator.comparing(player -> player.getHeightInInches()));
 
-        // Sort the stream:
         Stream<Player> playerStream = players.stream().sorted(comparator);
-        playerStream.forEach(System.out::println);
+
+        List<Player> sPlayers = new ArrayList<>();
+        playerStream.forEach(player -> sPlayers.add(player));
+
+        while (!sPlayers.isEmpty()) {
+            for (Team team : teams) {
+                if (team.players.size() == 11) continue;
+                Player temp = sPlayers.get(0);
+                team.players.add(temp);
+                players.remove(temp);
+                sPlayers.remove(temp);
+            }
+        }
 
         System.out.println("Auto-assign complete");
     }
