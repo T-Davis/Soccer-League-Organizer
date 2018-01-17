@@ -1,11 +1,12 @@
 package com.trevor.model;
 
+import java.util.Set;
 import java.util.TreeSet;
 
 public class Team implements Comparable<Team> {
     public String teamName;
     public String coachName;
-    public TreeSet<Player> players;
+    public Set<Player> players;
 
     public Team(String teamName, String coach) {
         this.teamName = teamName;

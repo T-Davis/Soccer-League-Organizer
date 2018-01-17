@@ -11,8 +11,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Stream;
 
-// fix league report and auto assign
-
+import static java.lang.Boolean.parseBoolean;
 
 public class LeagueOrganizer {
     private BufferedReader reader;
@@ -20,6 +19,8 @@ public class LeagueOrganizer {
     private List<String> menu;
     private Set<Player> players;
     private int numTeamsNeeded;
+    private Queue<Player> waitingList;
+    private Set<Player> removedFromLeague;
 
     public LeagueOrganizer() {
         players = new TreeSet(Arrays.asList(Players.load()));
@@ -30,16 +31,19 @@ public class LeagueOrganizer {
         menu.add("Create new team");
         menu.add("Add player to team");
         menu.add("Remove player from team");
+        menu.add("Height Report");
         menu.add("League Balance Report");
-        menu.add("Experience Report");
         menu.add("Print roster");
         menu.add("Auto-assign players");
+        menu.add("Add player to waiting list");
+        menu.add("Remove player from league");
+        menu.add("Add player to league");
         menu.add("Exit the program");
     }
 
     public void welcome() {
         System.out.printf("Welcome to the League Organizer " +
-                "%nPlease input numbers to make your selections%n");
+                "%nPlease input numbers to make your selections %n");
     }
 
     private int promptAction() throws IOException, IndexOutOfBoundsException, NumberFormatException {
@@ -48,7 +52,7 @@ public class LeagueOrganizer {
                 "%nYour options are: %n", teams.size(), players.size(), numTeamsNeeded);
         int count = 1;
         for (String option : menu) {
-            System.out.printf("%d - %s %n", count, option);
+            System.out.printf("%02d - %s %n", count, option);
             count++;
         }
         System.out.printf("%nWhat would you like to do? %n");
@@ -60,7 +64,7 @@ public class LeagueOrganizer {
         do {
             try {
                 choice = promptAction();
-                if (numTeamsNeeded == 3 && choice != 1 && choice != 8) {
+                if (teams.size() == 0 && choice > 1 && choice < 8) {
                     System.out.printf("%n----- You must create a team first ----- %n");
                     continue;
                 }
@@ -75,10 +79,10 @@ public class LeagueOrganizer {
                         removePlayerFromTeam();
                         break;
                     case 4:
-                        leagueBalanceReport(selectTeam());
+                        heightReport();
                         break;
                     case 5:
-                        experienceReport();
+                        leagueBalanceReport();
                         break;
                     case 6:
                         printRoster();
@@ -87,7 +91,16 @@ public class LeagueOrganizer {
                         autoAssignPlayers();
                         break;
                     case 8:
-                        System.out.println("Exiting...");
+                        addPlayerToWaitingList();
+                        break;
+                    case 9:
+                        removePlayerFromLeague();
+                        break;
+                    case 10:
+                        addPlayerFromWaitingList();
+                        break;
+                    case 11:
+                        System.out.printf("Exiting... %n");
                         break;
                     default:
                         System.out.printf("%nUnknown Choice: '%s'. Try again %n", choice);
@@ -100,15 +113,15 @@ public class LeagueOrganizer {
             } catch (InvalidNameException ine) {
                 System.out.printf("%n----- Team name must not be a duplicate and only contain letters ----- %n");
             }
-        } while (choice != 8);
+        } while (choice != 11);
     }
 
     private Team promptNewTeam() throws IOException, InvalidNameException {
-        System.out.print("Enter the team's name:  ");
+        System.out.printf("Enter the team's name: %n");
         String teamName = reader.readLine().trim();
         String coachName;
         if (verifyTeamName(teamName)) {
-            System.out.print("Enter the coach's name:  ");
+            System.out.printf("Enter the coach's name: %n");
             coachName = reader.readLine().trim();
         } else {
             throw new InvalidNameException();
@@ -144,8 +157,12 @@ public class LeagueOrganizer {
     }
 
     private void addPlayerToTeam() throws IOException {
-        Player player = selectUnassignedPlayer();
-        if (player == null) throw new IllegalStateException("Player cannot be null");
+        if (players.size() == 0) {
+            System.out.printf("%n----- There are no unassigned players ----- %n");
+            return;
+        }
+        Player player = selectPlayer(players);
+        if (player == null) throw new IllegalStateException("Player cannot be null %n");
         Team team = selectTeam();
         if (team.players.size() >= 11) {
             System.out.printf("%n----- Teams cannot have more than 11 players ----- %n");
@@ -153,7 +170,7 @@ public class LeagueOrganizer {
         }
         team.players.add(player);
         players.remove(player);
-        System.out.printf("%nPlayer %s added to team %s  %n", player, team);
+        System.out.printf("%n%s added to %s  %n", player, team);
     }
 
     private void removePlayerFromTeam() throws IOException {
@@ -162,40 +179,24 @@ public class LeagueOrganizer {
             System.out.printf("%n----- There are no players assigned to this team ----- %n");
             return;
         }
-        Player player = selectAssignedPlayer(team);
+        Player player = selectPlayer(team.players);
         team.players.remove(player);
         players.add(player);
+        System.out.printf("%n%s removed from %s  %n", player, team);
+
     }
 
-    private Player selectUnassignedPlayer() throws IOException, IndexOutOfBoundsException, NumberFormatException {
+    private Player selectPlayer(Set<Player> players) throws IOException, IndexOutOfBoundsException, NumberFormatException {
         int count = 1;
         for (Player player : players) {
             System.out.printf("%02d - %s %n", count, player);
             count++;
         }
-        System.out.printf("%nChoose a player:  ");
+        System.out.printf("%nChoose a player: %n");
         int choice = Integer.parseInt(reader.readLine());
         count = 1;
 
         for (Player player : players) {
-            if (count == choice) return player;
-            count++;
-        }
-        //this should never happen!
-        return null;
-    }
-
-    private Player selectAssignedPlayer(Team team) throws IOException, IndexOutOfBoundsException, NumberFormatException {
-        int count = 1;
-        for (Player player : team.players) {
-            System.out.printf("%02d - %s %n", count, player);
-            count++;
-        }
-        System.out.printf("%nChoose a player:  ");
-        int choice = Integer.parseInt(reader.readLine());
-        count = 1;
-
-        for (Player player : team.players) {
             if (count == choice) return player;
             count++;
         }
@@ -206,10 +207,10 @@ public class LeagueOrganizer {
     private Team selectTeam() throws IOException, IndexOutOfBoundsException, NumberFormatException {
         int count = 1;
         for (Team team : teams) {
-            System.out.printf("%d - %s %n", count, team);
+            System.out.printf("%02d - %s %n", count, team);
             count++;
         }
-        System.out.print("Choose a team:  ");
+        System.out.printf("Choose a team: %n");
         int choice = Integer.parseInt(reader.readLine());
         count = 1;
 
@@ -221,11 +222,12 @@ public class LeagueOrganizer {
         return null;
     }
 
-    private void leagueBalanceReport(Team team) {
+    private void heightReport() throws IOException {
+        Team team = selectTeam();
         int teamSize = team.players.size();
         if (teamSize == 0) {
-            System.out.printf("%n----- %s has zero players -----%n" +
-                    "----- You must have players to run a Team Report -----%n", team);
+            System.out.printf("%n----- %s has zero players ----- %n" +
+                    "----- You must have players to run a Height Report ----- %n", team);
             return;
         }
 
@@ -285,10 +287,10 @@ public class LeagueOrganizer {
                 "47-50 = %d %n", count35to40, count41to46, count47to50);
 
         avgExperience = 100 * (avgExperience / teamSize);
-        System.out.printf("Average experience is %.2f%%%n", avgExperience);
+        System.out.printf("Average experience is %.2f%% %n", avgExperience);
     }
 
-    private void experienceReport() {
+    private void leagueBalanceReport() {
         Map<String, List> experiencedPlayers = new HashMap<>();
 
         for (Team team : teams) {
@@ -316,6 +318,7 @@ public class LeagueOrganizer {
             double numExp = yesExperience.size();
             double numNonExp = noExperience.size();
             double expPerc = 100 * (numExp / (numExp + numNonExp));
+            if (!(expPerc >= 0)) expPerc = 0;
             System.out.println();
             System.out.printf("Team %s has %d experienced and %d inexperienced players %n" +
                             "Team %s is %.2f%% experienced %n%n",
@@ -325,7 +328,7 @@ public class LeagueOrganizer {
 
     private void printRoster() throws IOException {
         Team team = selectTeam();
-        System.out.printf("%nPlayers on %s %n%n", team);
+        System.out.printf("%nPlayers on %s: %n%n", team);
         for (Player player : team.players) {
             System.out.println(player);
         }
@@ -333,11 +336,11 @@ public class LeagueOrganizer {
 
     private void autoAssignPlayers() {
         if (players.isEmpty()) {
-            System.out.println("There are no unassigned players");
+            System.out.printf("There are no unassigned players %n");
             return;
         }
         if (numTeamsNeeded != 0) {
-            System.out.println("You must create all the teams first");
+            System.out.printf("You must create all the teams first %n");
             return;
         }
 
@@ -349,9 +352,20 @@ public class LeagueOrganizer {
         List<Player> sPlayers = new ArrayList<>();
         playerStream.forEach(player -> sPlayers.add(player));
 
-        while (!sPlayers.isEmpty()) {
+        int numTeams = teams.size();
+        boolean go = true;
+        while (go) {
+            int count = 0;
             for (Team team : teams) {
-                if (team.players.size() == 11) continue;
+                if (team.players.size() == 11) {
+                    count++;
+                    if (count == numTeams) {
+                        System.out.printf("All teams have 11 players %n");
+                        go = false;
+                        break;
+                    }
+                    continue;
+                }
                 Player temp = sPlayers.get(0);
                 team.players.add(temp);
                 players.remove(temp);
@@ -359,6 +373,51 @@ public class LeagueOrganizer {
             }
         }
 
-        System.out.println("Auto-assign complete");
+        System.out.printf("Auto-assign complete %n");
+    }
+
+    private void addPlayerToWaitingList() throws IOException {
+        if (waitingList == null) waitingList = new LinkedList<>();
+        System.out.printf("%nInput first name %n");
+        String first = reader.readLine();
+
+        System.out.printf("%nInput last name %n");
+        String last = reader.readLine();
+
+        System.out.printf("%nInput height in inches %n");
+        int height = Integer.parseInt(reader.readLine());
+
+        System.out.printf("%nInput experience: true | false %n");
+        boolean experience = Boolean.parseBoolean(reader.readLine());
+        Player player = new Player(first, last, height, experience);
+        if (players.contains(player)) {
+            System.out.printf("%s already exists in this league! %n", player);
+            return;
+        }
+        waitingList.add(player);
+        System.out.printf("%n%s added to waiting list %n", player);
+    }
+
+    private void removePlayerFromLeague() throws IOException {
+        if (players.size() == 0) {
+            System.out.printf("%n----- There are no unassigned players ----- %n");
+            return;
+        }
+        if (removedFromLeague == null) removedFromLeague = new TreeSet<>();
+        Player player = selectPlayer(players);
+        players.remove(player);
+        removedFromLeague.add(player);
+        System.out.printf("%n%s removed from league %n", player);
+    }
+
+    private void addPlayerFromWaitingList() throws IOException {
+        if (waitingList == null || waitingList.size() == 0) {
+            System.out.printf("%n----- There are no players on the waiting list ----- %n");
+            return;
+        }
+
+        Player player = waitingList.remove();
+        players.add(player);
+        System.out.printf("%n%s added to league %n", player);
     }
 }
