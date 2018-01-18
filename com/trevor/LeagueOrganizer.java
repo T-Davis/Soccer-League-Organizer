@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.lang.Boolean.parseBoolean;
-
 public class LeagueOrganizer {
     private BufferedReader reader;
     private Set<Team> teams;
@@ -331,7 +329,11 @@ public class LeagueOrganizer {
         System.out.printf("%nPlayers on %s: %n%n", team);
         for (Player player : team.players) {
             System.out.println(player);
+
         }
+        Scanner scan = new Scanner(System.in);
+        System.out.printf("%nPress Enter key to continue . . . ");
+        scan.nextLine();
     }
 
     private void autoAssignPlayers() {
